@@ -1,0 +1,170 @@
+[
+  {
+    "doc_id": "doc-5803e0f199fe3",
+    "doc_title": "Toto",
+    "doc_code": "D-FACT-3304904954068766",
+    "doc_desc": "fdsfdsfds",
+    "tdoc_id": "tdoc-factures",
+    "doc_year": "",
+    "doc_month": "",
+    "doc_day": "",
+    "cats": [
+      {
+        "cat_id": "cat-administratif",
+        "cat_title": "Administratif",
+        "cat_code": "CAT-ADMIN",
+        "cat_desc": "Documents administratifs."
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "tie-gdf",
+        "tier_title": "GDF Suez",
+        "tier_code": "GDF",
+        "tier_desc": "Fournisseur de Gaz."
+      }
+    ],
+    "metas": [
+      {
+        "doc_id": "doc-5803e0f199fe3",
+        "meta_id": "mtdoc-factures-01",
+        "tdoc_id": "tdoc-factures",
+        "mdoc_title": "Date",
+        "mdoc_value": "2016-10-01"
+      },
+      {
+        "doc_id": "doc-5803e0f199fe3",
+        "meta_id": "mtdoc-factures-02",
+        "tdoc_id": "tdoc-factures",
+        "mdoc_title": "Montant T.T.C",
+        "mdoc_value": "1546"
+      }
+    ]
+  },
+  {
+    "doc_id": "doc-5803ec3b4deea",
+    "doc_title": "Toto",
+    "doc_code": "D-FACT-796687431717333",
+    "doc_desc": "fdsfdsfds",
+    "tdoc_id": "tdoc-factures",
+    "doc_year": "",
+    "doc_month": "",
+    "doc_day": "",
+    "cats": [
+      {
+        "cat_id": "cat-administratif",
+        "cat_title": "Administratif",
+        "cat_code": "CAT-ADMIN",
+        "cat_desc": "Documents administratifs."
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "tie-gdf",
+        "tier_title": "GDF Suez",
+        "tier_code": "GDF",
+        "tier_desc": "Fournisseur de Gaz."
+      }
+    ],
+    "metas": [
+      {
+        "doc_id": "doc-5803ec3b4deea",
+        "meta_id": "mtdoc-factures-01",
+        "tdoc_id": "tdoc-factures",
+        "mdoc_title": "Date",
+        "mdoc_value": "2016-10-01"
+      },
+      {
+        "doc_id": "doc-5803ec3b4deea",
+        "meta_id": "mtdoc-factures-02",
+        "tdoc_id": "tdoc-factures",
+        "mdoc_title": "Montant T.T.C",
+        "mdoc_value": "1546"
+      }
+    ]
+  },
+  {
+    "doc_id": "doc-5803ec924682d",
+    "doc_title": "az",
+    "doc_code": "D-FACT-6823868764683463",
+    "doc_desc": "zzz",
+    "tdoc_id": "tdoc-factures",
+    "doc_year": "",
+    "doc_month": "",
+    "doc_day": "",
+    "cats": [
+      {
+        "cat_id": "cat-administratif",
+        "cat_title": "Administratif",
+        "cat_code": "CAT-ADMIN",
+        "cat_desc": "Documents administratifs."
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "tie-gdf",
+        "tier_title": "GDF Suez",
+        "tier_code": "GDF",
+        "tier_desc": "Fournisseur de Gaz."
+      }
+    ],
+    "metas": [
+      {
+        "doc_id": "doc-5803ec924682d",
+        "meta_id": "mtdoc-factures-01",
+        "tdoc_id": "tdoc-factures",
+        "mdoc_title": "Date",
+        "mdoc_value": ""
+      },
+      {
+        "doc_id": "doc-5803ec924682d",
+        "meta_id": "mtdoc-factures-02",
+        "tdoc_id": "tdoc-factures",
+        "mdoc_title": "Montant T.T.C",
+        "mdoc_value": "15698"
+      }
+    ]
+  },
+  {
+    "doc_id": "doc-58040019746f7",
+    "doc_title": "Coucou",
+    "doc_code": "D-FACT-7951342126908940",
+    "doc_desc": "Hehehe",
+    "tdoc_id": "tdoc-bullpaies",
+    "doc_year": "",
+    "doc_month": "",
+    "doc_day": "",
+    "cats": [
+      {
+        "cat_id": "cat-administratif",
+        "cat_title": "Administratif",
+        "cat_code": "CAT-ADMIN",
+        "cat_desc": "Documents administratifs."
+      }
+    ],
+    "tiers": [
+      {
+        "tier_id": "tie-bouygues",
+        "tier_title": "Bouygues Telecom",
+        "tier_code": "BTCOM",
+        "tier_desc": "FAI."
+      }
+    ],
+    "metas": [
+      {
+        "doc_id": "doc-58040019746f7",
+        "meta_id": "mtdoc-bullpaies-01",
+        "tdoc_id": "tdoc-bullpaies",
+        "mdoc_title": "Montant BRUT",
+        "mdoc_value": "1254"
+      },
+      {
+        "doc_id": "doc-58040019746f7",
+        "meta_id": "mtdoc-bullpaies-02",
+        "tdoc_id": "tdoc-bullpaies",
+        "mdoc_title": "Montant NET",
+        "mdoc_value": "4789"
+      }
+    ]
+  }
+]

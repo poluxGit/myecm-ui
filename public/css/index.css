@@ -1,0 +1,141 @@
+/** Color Variables **/
+:root{
+    --maincolor-1:#979fa2;
+    --maincolor-2:#3b6d86;
+    --maincolor-3:#234150;
+    --mainfontcolor-1:#c4c791;
+}
+
+
+/** Global Styles **/
+* {
+    margin : 0;
+    padding : 0;
+
+}
+/*BODY {
+    background-color: var(--maincolor-1);
+    color : var(--mainfontcolor-1);
+}*/
+
+/** Specifics Class **/
+
+
+/** Common Panel **/
+#mainCentralPanel{
+    width: 100%;
+    height: 650px;
+}
+/******************************************************************************/
+/* Header Panel                                                               */
+/******************************************************************************/
+#mainHeaderPanel {
+    padding-left: 10px;
+    margin-bottom : 0px;
+    margin-top :10px;
+}
+
+.navbar {
+  margin-bottom: 0 !important;
+}
+/*
+#mainHeaderPanel H1 {
+    float: left;
+    margin-left : 20px;
+    margin-top: 25px;
+}*/
+
+/*#divHeaderButtonPanel {
+    border-radius: 5px;
+    float:right;
+    margin-right : 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: #484848;
+    padding : 5px 10px;
+}*/
+
+
+
+
+/******************************************************************************/
+/* Left Panel                                                                 */
+/******************************************************************************/
+#mainLeftPanel {
+    float :left;
+    width : 20%;
+    min-height: 650px;
+    height: auto;
+    background-color: #eee;
+    padding: 7px 10px;
+
+}
+
+#mainLeftPanel LI {
+    text-align: center;
+    padding : 10px;
+}
+
+/*#mainLeftPanel LABEL {
+    color: #c2c2c2;
+    float:left;
+    padding: 5px 10px 10px 10px;
+    font-weight: lighter;
+}*/
+
+/*#mainLeftPanel INPUT {
+    color: #1c1c1c;
+    width: auto;
+}*/
+#mainLeftPanel BUTTON {
+  float:right;
+  margin-top:3px;
+
+}
+
+
+/******************************************************************************/
+/* Right Panel                                                               */
+/******************************************************************************/
+#mainRightPanel{
+    float :right;
+    padding: 5px 10px;
+    width : 80%;
+
+}
+#mainRightPanel ARTICLE{
+    padding: 10px;
+}
+
+/******************************************************************************/
+/* Footer Panel                                                               */
+/******************************************************************************/
+#mainWindowFooter{
+    position: absolute;
+    bottom : 0px;
+    height : 50px;
+    width: 100%;
+    /*background-color: var(--maincolor-2);
+    color : var(--mainfontcolor-1);*/
+    text-align: center;
+    vertical-align: text-bottom;
+}
+
+
+.example-enter {
+  opacity: 0.01;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.example-leave {
+  opacity: 1;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
