@@ -42,8 +42,7 @@ class CategorieCreateView extends React.Component {
         cat_code:'',
         cat_title:'',
         cat_desc:''
-      },
-      _creationCallBack:undefined
+      }
     };
   }
 
