@@ -15,6 +15,7 @@ import pubsub from 'pubsub-js';
 import { Tabs, Tab, TabContainer, TabContent, TabPane } from 'react-bootstrap';
 
 const LocalData = require('./../application.storage');
+const _ = require('underscore');
 
 // Main Panels Renderer & Manager !
 class ViewsContainer extends React.Component {
@@ -66,6 +67,14 @@ class ViewsContainer extends React.Component {
       console.log('ViewsContainer - Event "'+topic+'" received.');
       this.openTableDocViewPanel();
     }.bind(this));
+
+    // Closing Panel Document View
+    this.pubsub_token_closepanel = pubsub.subscribe('close-panel', function(topic,panelId) {
+      console.log('ViewsContainer - Event "'+topic+'" received for '+panelId);
+      this.closePanel(panelId);
+    }.bind(this));
+
+
     //'open-doc-table-panel'
   }
 
@@ -77,6 +86,7 @@ class ViewsContainer extends React.Component {
     pubsub.unsubscribe(this.pubsub_token_createdoc);
     pubsub.unsubscribe(this.pubsub_token_editdoc);
     pubsub.unsubscribe(this.pubsub_token_tabledoc);
+    pubsub.unsubscribe(this.pubsub_token_closepanel);
   }
 
   // Open an existing Document View (edit mode)!
@@ -84,7 +94,7 @@ class ViewsContainer extends React.Component {
   {
     if(docid){
       var lObjDoc = LocalData.getDocumentbyId(docid);
-      this.openNewPanel('doc-edit',docid,{docattributes:lObjDoc});
+      this.openNewPanel('doc-edit',lObjDoc.doc_title,docid,{docattributes:lObjDoc});
     }
   }
 
@@ -92,33 +102,54 @@ class ViewsContainer extends React.Component {
   openCreateDocViewPanel()
   {
     console.log('ViewsContainer - Opening a Document View in CREATION Mode');
-    this.openNewPanel('doc-create','Nouveau Document',{});
-
-
+    this.openNewPanel('doc-create','Nouveau Document','new-doc',{});
   }
 
   // Open a Table about all documents View Panels !
   openTableDocViewPanel()
   {
-    this.openNewPanel('doc-table','Tous les Documents',{});
+    this.openNewPanel('doc-table','Tous les Documents','all-docs',{});
   }
 
   // Open a new panels
-  openNewPanel(type,title,options){
+  openNewPanel(type,title,id,options){
     console.log('ViewsContainer - Opening a new panel (Type:'+type+'|Title:"'+title+'").');
     var panels = this.state.panels.slice();
 
-    var newPanel = [{
-      id    : 'panel_'+type,
-      mode  : type,
-      title : title,
-      props : options
-    }];
-    panels = panels.concat(newPanel);
-    this.setState({
-      panels:panels,
-      activePanelKey:'panel_'+type
-    });
+    if(_.findIndex(panels, {id:'panel_'+id}) < 0)
+    {
+      var newPanel = [{
+        id    : 'panel_'+id,
+        mode  : type,
+        title : title,
+        props : options
+      }];
+      panels = panels.concat(newPanel);
+      this.setState({
+        panels:panels,
+        activePanelKey:'panel_'+type
+      });
+    }
+    else {
+      console.debug('Le panel n\'as pas pu être trouvé ! (id:"panel_'+id+'").');
+    }
+  }
+
+  // Close a panels with his ID
+  closePanel(id){
+    console.log('ViewsContainer - Close a panel (Id:'+id+'").');
+    var panels = this.state.panels.slice();
+
+    if(_.findIndex(panels, {id:'panel_'+id}) >= 0)
+    {
+      panels = _.reject(panels,{id:'panel_'+id});
+      this.setState({
+        panels:panels
+      });
+    }
+    else {
+      console.debug('Un panel de même type est déjà ouvert! (id:"panel_'+id+'").');
+    }
   }
 
   /**

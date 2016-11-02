@@ -1,8 +1,10 @@
 import React  from 'react';
 import Axios from 'axios';
+import pubsub from 'pubsub-js';
 import { Form, FormGroup, ControlLabel, FormControl, Col, Button } from 'react-bootstrap';
 
 const LocalData = require('./../application.storage');
+const LocalDataSync = require('./../application.data-sync');
 const _ = require('underscore');
 
 /**
@@ -16,15 +18,22 @@ class DocumentEditView extends React.Component {
     //class using super()
     super(props);
 
-    this.handlerTitleChanged    = this.onTitleChanged.bind(this);
-    this.handlerDescChanged     = this.onDescriptionChanged.bind(this);
-    this.handlerTypeDocChanged  = this.onTypeDocChanged.bind(this);
-    this.handlerCategorieChanged  = this.onCategorieChanged.bind(this);
-    this.handlerTierChanged  = this.onTierChanged.bind(this);
-    this.handlerDateChanged          = this.onDateChanged.bind(this);
+    // Event Handlers
+    this.handlerTitleChanged                          = this.onTitleChanged.bind(this);
+    this.handlerDescChanged                           = this.onDescriptionChanged.bind(this);
+    this.handlerTypeDocChanged                        = this.onTypeDocChanged.bind(this);
+    this.handlerCategorieChanged                      = this.onCategorieChanged.bind(this);
+    this.handlerTierChanged                           = this.onTierChanged.bind(this);
+    this.handlerDateChanged                           = this.onDateChanged.bind(this);
+    this._cancelUpdate                                = this._cancelUpdate.bind(this);
+    this._deleteDoc                                   = this._deleteDoc.bind(this);
+    this.handleSubmitFormEvent                        = this.handleSubmitFormEvent.bind(this);
+    this._cbSubmitFormEventCallBackDocumentUpdated    = this._cbSubmitFormEventCallBackDocumentUpdated.bind(this);
+    this._cbSubmitFormEventCallBackCategoriesCreated  = this._cbSubmitFormEventCallBackCategoriesCreated.bind(this);
+    this._cbSubmitFormEventCallBackTiersCreated       = this._cbSubmitFormEventCallBackTiersCreated.bind(this);
+    this._cbSubmitDocumentEventCallBackDeleted        = this._cbSubmitDocumentEventCallBackDeleted.bind(this);
 
-    // Initial State of the component is defined
-    // in the constructor also
+    // Initial State of the component
     this.state = {
       docattributes : {
         doc_id    : props.props.docattributes.doc_id,
@@ -40,21 +49,14 @@ class DocumentEditView extends React.Component {
         tiers   : []
       }
     };
-    var lCats = [];
-    props.props.docattributes.cats.forEach(function(elem,itemIdx){
-      lCats.push(elem.cat_id);
-    });
 
-    this.state.cats = lCats;
-
-    var lTiers = [];
-    props.props.docattributes.tiers.forEach(function(elem,itemIdx){
-      lTiers.push(elem.tier_id);
-    });
-    this.state.tiers = lTiers;
+    // Getting only ids !
+    this.state.docattributes.cats = _.pluck(props.props.docattributes.cats,'cat_id');
+    this.state.docattributes.tiers = _.pluck(props.props.docattributes.tiers,'tier_id');
+    this.state.docattributes.metas = props.props.docattributes.metas;
   }
 
-  // Merge Categorie attributes with param !
+  // Merge Documents attributes with param !
   _updateFieldValueInState(fieldValues)
   {
     var lArrayDocData = this.state.docattributes;
@@ -77,7 +79,7 @@ class DocumentEditView extends React.Component {
     {
       lStrValue = null;
     }
-    this._updateFieldValueInState({tdoc_id   : lStrValue, doc_code : this.generateDocUniqueID(lStrValue,this.state.docattributes.doc_year)});
+    this._updateFieldValueInState({tdoc_id   : lStrValue});
   }
   onCategorieChanged(e)
   {
@@ -130,35 +132,102 @@ class DocumentEditView extends React.Component {
         doc_year:lArrDate[0],
         doc_month:lArrDate[1],
         doc_day:lArrDate[2],
-        doc_code : this.generateDocUniqueID(this.state.docattributes.tdoc_id,lArrDate[0])
+
       };
     }
     this._updateFieldValueInState(lObjResultat);
   }
 
-  generateDocUniqueID(typeCode,yearDoc){
-    var typdocObj = { tdoc_code:'temp' };
-    if(typeCode && typeCode !== '')
-    {
-      typdocObj = LocalData.getTypeDocById(typeCode);
-    }
-    return 'D-'+typdocObj.tdoc_code.toUpperCase()+'-'+yearDoc.toString()+'-XXXX';
+  _cancelUpdate(e) {
+    pubsub.publish('close-panel', this.state.docattributes.doc_id);
   }
 
+  handleSubmitFormEvent(e)
+  {
+      LocalDataSync.updateDocument(this.state.docattributes,this._cbSubmitFormEventCallBackDocumentUpdated);
+  }
+
+  /*
+   * CallBack Submit Form Event
+   */
+  _cbSubmitFormEventCallBackDocumentUpdated(response) {
+
+    if(response.status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document (id:"'+response.data+'") mis à jour avec succès.'});
+      // Liaison des categories !
+      LocalDataSync.addCategoriesToDocument(response.data,this.state.docattributes.cats,this._cbSubmitFormEventCallBackCategoriesCreated);
+      // Liaison des Tiers !
+      LocalDataSync.addTiersToDocument(response.data,this.state.docattributes.tiers,this._cbSubmitFormEventCallBackTiersCreated);
+
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response.data)+'").'});
+    }
+  }
+
+  /*
+   * CallBack Submit Form Event after cat ok
+   */
+  _cbSubmitFormEventCallBackCategoriesCreated(response) {
+    if(response[0].status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document/Cat (id:"'+response[0].data+'") crée avec succès.'});
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response)+'").'});
+    }
+  }
+
+  /*
+   * CallBack Submit Form Event after tier ok
+   */
+  _cbSubmitFormEventCallBackTiersCreated(response) {
+    if(response[0].status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document/Tier (id:"'+response[0].data+'") crée avec succès.'});
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response)+'").'});
+    }
+  }
+
+
+  /*
+   * CallBack Submit Form Event after tier ok
+   */
+  _cbSubmitDocumentEventCallBackDeleted(response) {
+    if(response.status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document (id:"'+this.state.docattributes.doc_id+'") effacé avec succès.'});
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response)+'").'});
+    }
+  }
+
+  _deleteDoc(e){
+    // @TODO Ajouter validation avant suppression!
+    LocalDataSync.deleteDocument(this.state.docattributes.doc_id,this._cbSubmitDocumentEventCallBackDeleted);
+    pubsub.publish('app-datareload-all', 'doc');
+  }
   // Render Components !
   render() {
     // Options for SELECT !
     var categorieItems  = [];
     var tierItems       = [];
     var typdocItems     = [];
+    var categorieObjSelected  = {};
 
     var categorieObj  = LocalData.getAllCategories();
     var tierObj       = LocalData.getAllTiers();
     var typdocObj     = LocalData.getAllTypeDocs();
 
+    var self = this;
     // Generate Options HTML Tag for Categorie!
     categorieObj.forEach(function(categorie){
       categorieItems.push(<option key={categorie.cat_id} value={categorie.cat_id}>{categorie.cat_title}</option>);
+      _.extend(categorieObjSelected,[categorie.cat_id]);
     });
     // Generate Options HTML Tag for Tier!
     tierObj.forEach(function(tier){
@@ -190,10 +259,20 @@ class DocumentEditView extends React.Component {
       );
     });
 
+    var styleDivBouton = {
+      'padding' : '5px',
+      'float'   : 'right'
+    };
+
+    var styleBouton = {
+      'margin' : '5px'
+
+    };
+
     return (
       <article id={this.props.docid}>
         <header>
-          <h3 title={this.props.docid}>{this.props.docattributes.doc_title}</h3>
+          <h3 title={this.props.docid}>{this.props.props.docattributes.doc_title}</h3>
         </header>
         <Form horizontal>
           <FormGroup controlId='formControlsText_DocCode'>
@@ -212,6 +291,7 @@ class DocumentEditView extends React.Component {
             <Col sm={10}>
               <FormControl
                 componentClass="select"
+                disabled={true}
                 placeholder="Choisir un type de document..."
                 value={this.state.docattributes.tdoc_id == null ? 0:this.state.docattributes.tdoc_id}
                 onChange={this.handlerTypeDocChanged}>
@@ -236,6 +316,7 @@ class DocumentEditView extends React.Component {
                 <FormControl
                   type="date"
                   placeholder='DD/MM/YYY'
+                  value={(this.state.docattributes.doc_year && this.state.docattributes.doc_month && this.state.docattributes.doc_day)?this.state.docattributes.doc_year +'-'+ this.state.docattributes.doc_month+'-'+this.state.docattributes.doc_day:''}
                   onChange={this.handlerDateChanged}
                    />
               </Col>
@@ -274,9 +355,17 @@ class DocumentEditView extends React.Component {
           </FormGroup>
           {metaControlItems}
 
-          <Button type="submit">
-            Mettre à jour
-          </Button>
+          <div style={styleDivBouton}>
+            <Button bsStyle="primary" style={styleBouton} onClick={this.handleSubmitFormEvent}>
+              Mise à jour
+            </Button>
+            <Button bsStyle="danger" style={styleBouton} onClick={this._deleteDoc}>
+              Supprimer
+            </Button>
+            <Button bsStyle="default" style={styleBouton} onClick={this._cancelUpdate}>
+              Annuler
+            </Button>
+          </div>
 
         </Form>
 

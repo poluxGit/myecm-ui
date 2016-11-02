@@ -20,7 +20,7 @@ class DocumentTable extends React.Component {
 
   // Formatting Date Column
   _dataFormatDateDoc(cell,row){
-    return row.doc_year+row.doc_month+row.doc_day || 'Not defined!';
+    return row.doc_year+'-'+row.doc_month+'-'+row.doc_day || 'Not defined!';
   }
 
   // Formating TypeDoc Column : binding real name
@@ -75,7 +75,7 @@ class DocumentTable extends React.Component {
         	striped={true}
         	hover={true}
         	condensed={true}
-        	pagination={true}
+        	pagination={false}
         	selectRow={selectPropsRow}
         	insertRow={false}
         	deleteRow={false}

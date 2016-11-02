@@ -8,6 +8,8 @@ import pubsub from 'pubsub-js';
 const localStorage    = global.localStorage;
 const sessionStorage  = global.sessionStorage;
 
+const _ = require('underscore');
+
 /*
  * LocalStroage Data structure
  *
@@ -35,7 +37,7 @@ function getAppSetting(pStrSettingName)
 function setAppSetting(pStrSettingName, pStrSettingValue)
 {
   localStorage.setItem('app-settings_'+pStrSettingName,pStrSettingValue);
-  console.debug('ApplicationStorageSystem - AppSettings - Properties : "'+pStrSettingName+'" | Value : "' +pStrSettingValue+ '".');
+  //console.debug('ApplicationStorageSystem - AppSettings - Properties : "'+pStrSettingName+'" | Value : "' +pStrSettingValue+ '".');
 }
 
 
@@ -231,7 +233,7 @@ function getCategorieData(catid) {
       {
         if(lTabDocs[i].cat_id == catid)
         {
-          console.debug('ApplicationStorageSystem - Categorie with ID "' + catid + '" founded!');
+          //console.debug('ApplicationStorageSystem - Categorie with ID "' + catid + '" founded!');
           lObjDocResult = lTabDocs[i];
           return lObjDocResult;
         }
@@ -277,7 +279,7 @@ function getTierData(tierid) {
       {
         if(lTabDocs[i].tier_id == tierid)
         {
-          console.debug('ApplicationStorageSystem - Tier with ID "' + tierid + '" founded!');
+          //console.debug('ApplicationStorageSystem - Tier with ID "' + tierid + '" founded!');
           lObjDocResult = lTabDocs[i];
           return lObjDocResult;
         }
@@ -323,7 +325,7 @@ function getTypeDocData(tdocid) {
       {
         if(lTabDocs[i].tdoc_id == tdocid)
         {
-          console.debug('ApplicationStorageSystem - TypeDoc with ID "' + tdocid + '" founded!');
+          //console.debug('ApplicationStorageSystem - TypeDoc with ID "' + tdocid + '" founded!');
           lObjDocResult = lTabDocs[i];
           return lObjDocResult;
         }

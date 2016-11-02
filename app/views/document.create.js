@@ -2,13 +2,13 @@
  * Document Creation  Form
  */
 import React  from 'react';
-import Axios from 'axios';
+import Axios  from 'axios';
+import pubsub from 'pubsub-js';
 import { Form, FormGroup, ControlLabel, FormControl, Col, Button } from 'react-bootstrap';
 
-
 const LocalData = require('./../application.storage');
+const LocalDataSync = require('./../application.data-sync');
 const _ = require('underscore');
-
 /**
  * DocumentCreateView : Document Renderer components
  */
@@ -20,11 +20,17 @@ class DocumentCreateView extends React.Component {
     //class using super()
     super(props);
 
-    this.handlerTitleChanged    = this.onTitleChanged.bind(this);
-    this.handlerDescChanged     = this.onDescriptionChanged.bind(this);
-    this.handlerTypeDocChanged  = this.onTypeDocChanged.bind(this);
-    this.handlerCategorieChanged  = this.onCategorieChanged.bind(this);
-    this.handlerTierChanged  = this.onTierChanged.bind(this);
+    this.handlerTitleChanged                          = this.onTitleChanged.bind(this);
+    this.handlerDescChanged                           = this.onDescriptionChanged.bind(this);
+    this.handlerTypeDocChanged                        = this.onTypeDocChanged.bind(this);
+    this.handlerCategorieChanged                      = this.onCategorieChanged.bind(this);
+    this.handlerTierChanged                           = this.onTierChanged.bind(this);
+    this.handlerDateChanged                           = this.onDateChanged.bind(this);
+    this.handleSubmitFormEvent                        = this.handleSubmitFormEvent.bind(this);
+    this._cbSubmitFormEventCallBackDocumentCreated    = this._cbSubmitFormEventCallBackDocumentCreated.bind(this);
+    this._cbSubmitFormEventCallBackCategoriesCreated  = this._cbSubmitFormEventCallBackCategoriesCreated.bind(this);
+    this._cbSubmitFormEventCallBackTiersCreated       = this._cbSubmitFormEventCallBackTiersCreated.bind(this);
+    this._cancelCreation                              = this._cancelCreation.bind(this);
 
     // Initial State of the component is defined
     // in the constructor also
@@ -106,6 +112,103 @@ class DocumentCreateView extends React.Component {
     this._updateFieldValueInState({tiers   : lArrTiers});
   }
 
+  onDateChanged(e)
+  {
+    var yearDoc = '';
+    var monthDoc = '';
+    var dayDoc = '';
+    var lObjResultat = {
+      doc_year:'',
+      doc_month:'',
+      doc_day:''
+    }
+    if(e.target.value){
+      var lArrDate = e.target.value.split("-");
+      lObjResultat = {
+        doc_year:lArrDate[0],
+        doc_month:lArrDate[1],
+        doc_day:lArrDate[2],
+        doc_code : this.generateDocUniqueID(this.state.docattributes.tdoc_id,lArrDate[0])
+      };
+    }
+    this._updateFieldValueInState(lObjResultat);
+  }
+
+  generateDocUniqueID(typeCode,yearDoc){
+    var typdocObj = { tdoc_code:'temp' };
+    var lArrDoc = null;
+    var lDoctotal = 0;
+    if(typeCode && typeCode !== '')
+    {
+      typdocObj = LocalData.getTypeDocById(typeCode);
+      lArrDoc  = LocalData.getAllDocuments();
+      lDoctotal = lArrDoc.length;
+    }
+    return 'D-'+typdocObj.tdoc_code.toUpperCase()+'-'+yearDoc.toString()+'-'+lDoctotal.toString();
+  }
+
+  /*
+   * Submit Form Event
+   */
+  handleSubmitFormEvent(e) {
+    LocalDataSync.createDocument(this.state.docattributes,this._cbSubmitFormEventCallBackDocumentCreated);
+  }
+
+  /*
+   * CallBack Submit Form Event
+   */
+  _cbSubmitFormEventCallBackDocumentCreated(response) {
+
+    if(response.status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document (id:"'+response.data+'") crée avec succès.'});
+      // Liaison des categories !
+      LocalDataSync.addCategoriesToDocument(response.data,this.state.docattributes.cats,this._cbSubmitFormEventCallBackCategoriesCreated);
+      // Liaison des Tiers !
+      LocalDataSync.addTiersToDocument(response.data,this.state.docattributes.tiers,this._cbSubmitFormEventCallBackTiersCreated);
+
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response.data)+'").'});
+    }
+  }
+
+  /*
+   * CallBack Submit Form Event after cat ok
+   */
+  _cbSubmitFormEventCallBackCategoriesCreated(response) {
+    if(response[0].status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document/Cat (id:"'+response[0].data+'") crée avec succès.'});
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response)+'").'});
+    }
+  }
+
+  /*
+   * CallBack Submit Form Event after tier ok
+   */
+  _cbSubmitFormEventCallBackTiersCreated(response) {
+    if(response[0].status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Document/Tier (id:"'+response[0].data+'") crée avec succès.'});
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response)+'").'});
+    }
+  }
+
+  /*
+   * Cancel Creation
+   */
+  _cancelCreation() {
+
+    pubsub.publish('close-panel', 'new-doc');
+
+  }
+
+
   // Render Components !
   render() {
     // Options for SELECT !
@@ -116,8 +219,6 @@ class DocumentCreateView extends React.Component {
     var categorieObj  = LocalData.getAllCategories();
     var tierObj       = LocalData.getAllTiers();
     var typdocObj     = LocalData.getAllTypeDocs();
-
-
 
     // Generate Options HTML Tag for Categorie!
     categorieObj.forEach(function(categorie){
@@ -132,7 +233,15 @@ class DocumentCreateView extends React.Component {
       typdocItems.push(<option key={typedoc.tdoc_id} value={typedoc.tdoc_id}>{typedoc.tdoc_title}</option>);
     });
 
+    var styleDivBouton = {
+      'padding' : '5px',
+      'float'   : 'right'
+    };
 
+    var styleBouton = {
+      'margin' : '5px'
+
+    };
 
     // CREATION MODE !
     return (
@@ -140,7 +249,7 @@ class DocumentCreateView extends React.Component {
           <header>
             <h3> Nouveau Document </h3>
           </header>
-          <Form horizontal>
+          <Form horizontal onSubmit={this.handleSubmitFormEvent}>
             <FormGroup controlId="formControlsSelect_TypeDocId">
               <Col componentClass={ControlLabel} sm={2}>Type</Col>
               <Col sm={10}>
@@ -170,6 +279,8 @@ class DocumentCreateView extends React.Component {
                   <FormControl
                     type="date"
                     placeholder='DD/MM/YYY'
+                    value={(this.state.docattributes.doc_year && this.state.docattributes.doc_month && this.state.docattributes.doc_day)?this.state.docattributes.doc_year +'-'+ this.state.docattributes.doc_month+'-'+this.state.docattributes.doc_day:''}
+                    onChange={this.handlerDateChanged}
                      />
                 </Col>
             </FormGroup>
@@ -182,7 +293,7 @@ class DocumentCreateView extends React.Component {
                   value={this.state.docattributes.cats}
                   onChange={this.handlerCategorieChanged}
                   multiple>
-                  <option key={0} value={0}>...</option>
+
                   {categorieItems}
                 </FormControl>
               </Col>
@@ -193,7 +304,7 @@ class DocumentCreateView extends React.Component {
                 <FormControl componentClass="select" placeholder="Choisir un Tier..." multiple
                   value={this.state.docattributes.tiers}
                   onChange={this.handlerTierChanged}>
-                  <option key={0} value={0}>...</option>
+
                   {tierItems}
                 </FormControl>
               </Col>
@@ -209,14 +320,18 @@ class DocumentCreateView extends React.Component {
                 </Col>
             </FormGroup>
 
-            <Button type="submit">
-              Créer
-            </Button>
-
+            <div style={styleDivBouton}>
+              <Button bsStyle="primary" style={styleBouton} onClick={this.handleSubmitFormEvent}>
+                Créer
+              </Button>
+              <Button bsStyle="danger" style={styleBouton} onClick={this._cancelCreation}>
+                Annuler
+              </Button>
+            </div>
           </Form>
 
             <p>&nbsp;</p>
-          <footer> Footer Article {this.props.docid} </footer>
+          <footer></footer>
         </article>
       );
 
