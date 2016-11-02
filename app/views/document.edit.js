@@ -210,6 +210,7 @@ class DocumentEditView extends React.Component {
     // @TODO Ajouter validation avant suppression!
     LocalDataSync.deleteDocument(this.state.docattributes.doc_id,this._cbSubmitDocumentEventCallBackDeleted);
     pubsub.publish('app-datareload-all', 'doc');
+    pubsub.publish('close-panel', this.state.docattributes.doc_id);
   }
   // Render Components !
   render() {
