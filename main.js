@@ -1,4 +1,5 @@
 const {app, BrowserWindow,globalShortcut} = require('electron')
+const _ = require('underscore');
 
 
 

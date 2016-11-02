@@ -13,7 +13,8 @@ import pubsub from 'pubsub-js';
 import { Form, FormGroup, ControlLabel, FormControl, Col, Button , Modal} from 'react-bootstrap';
 
 const LocalData = require('./../application.storage');
-
+const LocalDataSync = require('./../application.data-sync');
+const _ = require('underscore');
 
 // CategorieCreateView Class
 class CategorieCreateView extends React.Component {
@@ -26,6 +27,10 @@ class CategorieCreateView extends React.Component {
 
     // Creation Event
     this.handleSubmitFormEvent  = this.handleSubmitFormEvent.bind(this);
+    this._handleCatCodeChanged  = this._handleCatCodeChanged.bind(this);
+    this._handleCatDescChanged  = this._handleCatDescChanged.bind(this);
+    this._handleCatTitleChanged = this._handleCatTitleChanged.bind(this);
+    this._cbSubmitFormEvent     = this._cbSubmitFormEvent.bind(this);
     this.close                  = this.close.bind(this);
     this.open                   = this.open.bind(this);
 
@@ -64,57 +69,30 @@ class CategorieCreateView extends React.Component {
     pubsub.unsubscribe(this.pubsub_token_createCat);
   }
 
-  // /**
-  //  * componentDidMount
-  //  *
-  //  * Post render() method
-  //  *
-  //  * @link https://facebook.github.io/react/docs/react-component.html#componentdidmount
-  //  */
-  // componentDidMount() {
-  //
-  // }
-  //
-  // /**
-  //  * componentWillReceiveProps
-  //  *
-  //  * When props are updated...
-  //  *
-  //  * @link https://facebook.github.io/react/docs/react-component.html#componentWillReceiveProps
-  //  */
-  // componentWillReceiveProps(){
-  //
-  // }
-
-  // /**
-  //  * componentWillUpdate
-  //  *
-  //  * Post render() method
-  //  *
-  //  * @link https://facebook.github.io/react/docs/react-component.html#componentWillUpdate
-  //  */
-  // componentWillUpdate(){
-  //
-  // }
-  //
-  // /**
-  //  * componentDidUpdate
-  //  *
-  //  * Post render() method
-  //  *
-  //  * @link https://facebook.github.io/react/docs/react-component.html#componentDidUpdate
-  //  */
-  // componentDidUpdate(){
-  //
-  // }
-
   /*
    * Submit Form Event
    */
   handleSubmitFormEvent(e) {
     alert('Submit event on Categorie.');
+
+    LocalDataSync.createCategorie(this.state.cat_data,this._cbSubmitFormEvent);
     // console.log(`Search - Event Search launched with value : ${this.state.value}`);
     // pubsub.publish('open-doc-edit-panel', this.state.value);
+  }
+
+  /*
+   * CallBack Submit Form Event
+   */
+  _cbSubmitFormEvent(response) {
+
+    if(response.status == 200)
+    {
+      pubsub.publish('app-message', {type:'success',message:'Catégorie (id:"'+response.data+'") créée avec succès.'});
+      this.close();
+    }
+    else {
+      pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response.data)+'").'});
+    }
   }
 
   // Close Modal Action!
@@ -125,6 +103,33 @@ class CategorieCreateView extends React.Component {
   // Open Modal Action!
   open() {
     this.setState({ showModal: true });
+  }
+
+  // Cat Code Changed Event Handler
+  _handleCatCodeChanged(e)
+  {
+    this._updateFieldValueInState({ cat_code: e.target.value.toUpperCase()});
+    this._updateFieldValueInState({ cat_id: e.target.value.toLowerCase()});
+  }
+
+  // Cat Title Changed Event Handler
+  _handleCatTitleChanged(e)
+  {
+    this._updateFieldValueInState({ cat_title: e.target.value});
+  }
+
+  // Cat Desc Changed Event Handler
+  _handleCatDescChanged(e)
+  {
+    this._updateFieldValueInState({ cat_desc: e.target.value});
+  }
+
+  // Merge Categorie attributes with param !
+  _updateFieldValueInState(fieldValues)
+  {
+    var lArrayCatData = this.state.cat_data;
+    _.extend(lArrayCatData,fieldValues);
+    this.setState({cat_data:lArrayCatData});
   }
 
   /**
@@ -159,6 +164,7 @@ class CategorieCreateView extends React.Component {
                       type="text"
                       placeholder="Code Catégorie"
                       value={this.state.cat_data.cat_code}
+                      onChange={this._handleCatCodeChanged}
                        />
                   </Col>
                 </FormGroup>
@@ -169,6 +175,7 @@ class CategorieCreateView extends React.Component {
                       type="text"
                       placeholder="Titre"
                       value={this.state.cat_data.cat_title}
+                      onChange={this._handleCatTitleChanged}
                        />
                   </Col>
                 </FormGroup>
@@ -179,6 +186,7 @@ class CategorieCreateView extends React.Component {
                       componentClass="textarea"
                       placeholder="Description"
                       value={this.state.cat_data.cat_desc}
+                      onChange={this._handleCatDescChanged}
                        />
                   </Col>
                 </FormGroup>

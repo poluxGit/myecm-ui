@@ -6,14 +6,15 @@
  * @author polux
  * @extends React.Component
  */
-import React  from 'react';
-import Search from './components/search.component';
-import AppHistory from './components/history.component';
-import Toolbar from './components/toolbar.component';
-import ViewsContainer from './containers/views.container';
+import React                from 'react';
+import Search               from './components/search.component';
+import AppHistory           from './components/history.component';
+import Toolbar              from './components/toolbar.component';
+import ViewsContainer       from './containers/views.container';
 import CategorieCreateModal from './views/categorie.create';
-import pubsub from 'pubsub-js';
-import Axios from 'axios';
+import AppMessages          from './components/message.component';
+import pubsub               from 'pubsub-js';
+import Axios                from 'axios';
 import { PageHeader, Button , Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 
 const localData     = require('./application.storage');
@@ -139,7 +140,10 @@ class AppMyDocsContainer extends React.Component {
   render() {
     return (
       <div id={this.state.html_items.containerId}>
-        <PageHeader id={this.state.html_items.headerId} > {this.props.application_title} <small> {this.props.application_author.author_name} </small></PageHeader>
+        <PageHeader id={this.state.html_items.headerId}>
+           {this.props.application_title} <small> {this.props.application_author.author_name} </small>
+         <AppMessages />
+        </PageHeader>
 
         <Navbar inverse collapseOnSelect>
           <Navbar.Header>

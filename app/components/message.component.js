@@ -1,7 +1,7 @@
 /**
-* AppHistory - based on React.Component
+* AppMessagesComponent - based on React.Component
 *
-* History Component
+* Application Messages Component
 *
 * @author polux
 * @link https://facebook.github.io/react/docs/react-component.html
@@ -9,13 +9,13 @@
 // Importing libraries
 import React  from 'react';
 import pubsub from 'pubsub-js';
-import { FormGroup, ControlLabel, Panel } from 'react-bootstrap';
+import { FormGroup, ControlLabel,  Well, Fade } from 'react-bootstrap';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 const LocalData = require('./../application.storage');
 
-// AppHistory Class
-class AppHistory extends React.Component {
+// AppMessagesComponent Class
+class AppMessagesComponent extends React.Component {
 
   /*
   * Default Constructor
@@ -23,9 +23,11 @@ class AppHistory extends React.Component {
   constructor(props) {
     super(props);
 
+    this.displayName = 'AppMessagesComponent';
+
     // Initial State definition
     this.state = {
-      refresh:true,
+      showMsg:false,
       messages:[],
     };
   }
@@ -34,12 +36,14 @@ class AppHistory extends React.Component {
    * Post render Event
    */
   componentWillMount() {
-
     // when React renders me, I subscribe to the topic 'products'
     // .subscribe returns a unique token necessary to unsubscribe
     this.pubsub_token_message = pubsub.subscribe('app-message', function(topic, data) {
-      console.log('AppMyDocsContainer - Event "'+topic+'" received.');
-      this.setState({refresh:!this.state.refresh})
+      console.log(this.displayName+' - An Application Message Event received.');
+      var lArrMsgs = this.state.messages.slice();
+      lArrMsgs.push(data);
+      // Adding
+      this.setState({showMsg:true, messages: lArrMsgs})
     }.bind(this));
   }
 
@@ -57,52 +61,32 @@ class AppHistory extends React.Component {
   * @link https://facebook.github.io/react/docs/react-component.html#render
   */
   render() {
-    var lArrHsitoryEntries = LocalData.getAllHistoryObjects();
-    if(lArrHsitoryEntries && lArrHsitoryEntries.length >0){
-      var liHistoryEntries = LocalData.getAllHistoryObjects().reverse().map(function(entry,item){
-        return (
-          <li key={item}>
-            <span><small>{entry.message}</small></span>
-          </li>
-        );
-      });
+    var styleGlobal = {
+      'fontSize' : 'medium',
+      'float' : 'right',
+      'marginBottom' :'0',
+      'marginRight':'10px',
+      'padding':'5px'
+    }
+    var lObjLastMessage = {};
+    if(this.state.messages && this.state.messages.length > 0) {
+      lObjLastMessage = this.state.messages[this.state.messages.length -1];
+    }
+    else {
+      this.state.showMsg = false;
+    }
 
-      // <div>
-      //   <Button onClick={ ()=> this.setState({ open: !this.state.open })}>
-      //     click
-      //   </Button>
-      //   <Panel collapsible expanded={this.state.open}>
-      //     Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid.
-      //     Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
-      //   </Panel>
-      // </div>
-      return (
-        <FormGroup id='formGrp_History'>
-          <ControlLabel onClick={ ()=> this.setState({ open: !this.state.open })}> History </ControlLabel>
-          <Panel collapsible expanded={this.state.open}>
-            <ul>
-              <ReactCSSTransitionGroup
-                transitionName="example"
-                transitionEnterTimeout={1500}
-                transitionLeaveTimeout={1500}>
-                {liHistoryEntries}
-              </ReactCSSTransitionGroup>
-            </ul>
-          </Panel>
-        </FormGroup>
-      );
-    }
-    else
-    {
-      return (
-        <FormGroup id='formGrp_History'>
-          <ControlLabel> History </ControlLabel>
-          <ul>
-            <span> Aucune entrée </span>
-          </ul>
-        </FormGroup>
-      );
-    }
+    return (
+
+      <Fade in={this.state.showMsg} className={this.state.showMsg ? lObjLastMessage.type : 'default'} style={styleGlobal} onClick={()=>this.setState({showMsg:false})}>
+               <div>
+                 <Well bsSize='sm' className={this.state.showMsg ? 'success': 'default'}>
+                   {lObjLastMessage.message}
+                 </Well>
+               </div>
+             </Fade>
+
+    );
   }
 }
 
@@ -119,4 +103,4 @@ class AppHistory extends React.Component {
 // };
 // // displayName ? Used for debugging by JSX ???
 
-export default AppHistory
+export default AppMessagesComponent

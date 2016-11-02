@@ -170,29 +170,44 @@ function loadTiersFromServer() {
 
 // Adding a new Catégorie!
 function createNewCategorie(catdata, callbackHandler) {
-
+  console.log('ApplicationDataSynchronizer - HTTP POST Request About Catégorie creation.');
   // Data existance checks!
   if(catdata.cat_code && catdata.cat_title)
   {
-    var query_param = catdata;
+    var query_param = {
+      'cat_id': catdata.cat_id,
+      'cat_code': catdata.cat_code,
+      'cat_title': catdata.cat_title,
+      'cat_desc': catdata.cat_desc
+    };
+    var params = '';
+    var key = '';
+    for (key in query_param) {
+        params += encodeURIComponent(key)+"="+encodeURIComponent(query_param[key])+"&";
+    }
+
+    var query_options = {
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
+    };
     var lUrlQuery = 'categorie/'
 
     // Launch AJAX Request !
-    Axios.get('typedocument/')
+    Axios.post(lUrlQuery, params,query_options)
       .then(function(response){
         if(response.status == 200){
-          console.log('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
-          LocalData.addSessionLogMessage('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
-          LocalData.setTypeDocs(response.data);
+          console.log('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+          LocalData.addSessionLogMessage('HTTP POST - Création de Catégorie - Code:200 => OK | Data returned: '+JSON.stringify(response));
         }
         else {
-          console.log('AppMyDocsContainer - Erreur lors du chargement des données de typedoc (HTTP Code:'+response.status+').');
+          console.log('AppMyDocsContainer - Erreur lors de la création d\'une Catégorie (HTTP Code:'+response.status+').');
         }
+        callbackHandler(response);
       }).catch(function(error){
         console.log(error);
       });
   }else {
-    return undefined;
+    console.err('AppMyDocsContainer - Erreur lors de la création d\'une Catégorie ).');
+    throw new Error('Impossible de créer une catégorie. Les arguments sont insuffisants!');
   }
 
 }
