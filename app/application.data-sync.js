@@ -209,6 +209,44 @@ function createNewCategorie(catdata, callbackHandler) {
     console.err('AppMyDocsContainer - Erreur lors de la création d\'une Catégorie ).');
     throw new Error('Impossible de créer une catégorie. Les arguments sont insuffisants!');
   }
+}
+
+// Adding a new Catégorie!
+function createNewTier(tierdata, callbackHandler) {
+  console.log('ApplicationDataSynchronizer - HTTP POST Request About Tier creation.');
+  // Data existance checks!
+  if(tierdata.tier_code && tierdata.tier_title)
+  {
+    var query_param = tierdata;
+    var params = '';
+    var key = '';
+    for (key in query_param) {
+        params += encodeURIComponent(key)+"="+encodeURIComponent(query_param[key])+"&";
+    }
+
+    var query_options = {
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
+    };
+    var lUrlQuery = 'tier/'
+
+    // Launch AJAX Request !
+    Axios.post(lUrlQuery, params,query_options)
+      .then(function(response){
+        if(response.status == 200){
+          console.log('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+          LocalData.addSessionLogMessage('HTTP POST - Création de TIER - Code:200 => OK | Data returned: '+JSON.stringify(response));
+        }
+        else {
+          console.log('AppMyDocsContainer - Erreur lors de la création d\'un Tier (HTTP Code:'+response.status+').');
+        }
+        callbackHandler(response);
+      }).catch(function(error){
+        console.log(error);
+      });
+  }else {
+    console.err('AppMyDocsContainer - Erreur lors de la création d\'un Tier).');
+    throw new Error('Impossible de créer un tier. Les arguments sont insuffisants!');
+  }
 
 }
 
@@ -246,5 +284,6 @@ module.exports = {
   loadAllDataAboutDocuments : loadAllDataAboutDocuments,
 
   // Creation function!
-  createCategorie           : createNewCategorie
+  createCategorie           : createNewCategorie,
+  createTier                : createNewTier
 };

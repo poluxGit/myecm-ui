@@ -12,6 +12,7 @@ import AppHistory           from './components/history.component';
 import Toolbar              from './components/toolbar.component';
 import ViewsContainer       from './containers/views.container';
 import CategorieCreateModal from './views/categorie.create';
+import TierCreateModal      from './views/tier.create';
 import AppMessages          from './components/message.component';
 import pubsub               from 'pubsub-js';
 import Axios                from 'axios';
@@ -133,7 +134,8 @@ class AppMyDocsContainer extends React.Component {
   }
 
   handleAddTier(){
-    alert('CREATE TIER');
+    pubsub.publish('app-tier-create', null);
+    localData.addSessionHistoryMessage('Ouverture du formulaire de création de Tier.');
   }
 
   // Container components wrap presentation component
@@ -187,6 +189,7 @@ class AppMyDocsContainer extends React.Component {
           </div>
         </article>
         <CategorieCreateModal />
+        <TierCreateModal />
         <footer id={this.state.html_items.footerId}>
             By {this.props.application_author.author_name} - {this.props.application_version}
         </footer>
