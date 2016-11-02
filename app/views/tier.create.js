@@ -89,7 +89,7 @@ class TierCreateView extends React.Component {
       pubsub.publish('app-message', {type:'error',message:'Error (Code:"'+response.status+'"|Message:"'+response.message+'"|Data:"'+JSON.stringify(response.data)+'").'});
     }
   }
-  
+
   // Close Modal Action!
   close() {
     this.setState({ showModal: false });
