@@ -27,7 +27,7 @@ class Search extends React.Component {
   handleSearchEvent(e) {
     console.log(`Search - Event Search launched with value : ${this.state.value}`);
     pubsub.publish('open-doc-edit-panel', this.state.value);
-  //  this.props.searchDoc(this.state.value);
+  
   }
 
   render() {

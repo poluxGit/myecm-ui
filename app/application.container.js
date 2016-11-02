@@ -163,6 +163,7 @@ class AppMyDocsContainer extends React.Component {
             </Nav>
             <Nav pullRight>
               <NavDropdown eventKey={10} title="Ajouter ..." id="basic-nav-dropdown">
+                <MenuItem eventKey={10.4} onClick={this.handleCreateDoc}>Document</MenuItem>
                 <MenuItem eventKey={10.1} onClick={this.handleAddCat}>Catégorie</MenuItem>
                 <MenuItem eventKey={10.2} onClick={this.handleAddTier}>Tier</MenuItem>
                 <MenuItem eventKey={10.3} onClick={this.handleAddTypeDoc}>Type de document</MenuItem>
