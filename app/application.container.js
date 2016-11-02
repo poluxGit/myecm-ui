@@ -135,7 +135,7 @@ class AppMyDocsContainer extends React.Component {
 
   handleAddTier(){
     pubsub.publish('app-tier-create', null);
-    localData.addSessionHistoryMessage('Ouverture du formulaire de création de Catégorie.');
+    localData.addSessionHistoryMessage('Ouverture du formulaire de création de Tier.');
   }
 
   // Container components wrap presentation component
