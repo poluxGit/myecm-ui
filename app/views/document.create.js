@@ -7,6 +7,7 @@ import { Form, FormGroup, ControlLabel, FormControl, Col, Button } from 'react-b
 
 
 const LocalData = require('./../application.storage');
+const _ = require('underscore');
 
 /**
  * DocumentCreateView : Document Renderer components
@@ -29,55 +30,37 @@ class DocumentCreateView extends React.Component {
     // in the constructor also
     this.state = {
       docattributes : {
-        doc_id    : props.docattributes.doc_id,
-        doc_title : props.docattributes.doc_title,
-        doc_code  : props.docattributes.doc_code,
-        doc_desc  : props.docattributes.doc_desc,
-        tdoc_id   : props.docattributes.tdoc_id,
-        doc_year  : props.docattributes.doc_year,
-        doc_month : props.docattributes.doc_month,
-        doc_day   : props.docattributes.doc_day,
-        meta      : [],
-        cat_id    : props.docattributes.cat_id,
-        tier_id   : props.docattributes.tier_id,
-        file_id   : props.docattributes.file_id
+        doc_id    : '',
+        doc_title : '',
+        doc_code  : '',
+        doc_desc  : '',
+        tdoc_id   : '',
+        doc_year  : '',
+        doc_month : '',
+        doc_day   : '',
+        metas     : [],
+        cats      : [],
+        tiers     : [],
+        files     : []
       }
     };
   }
 
+  // Merge Categorie attributes with param !
+  _updateFieldValueInState(fieldValues)
+  {
+    var lArrayDocData = this.state.docattributes;
+    _.extend(lArrayDocData,fieldValues);
+    this.setState({docattributes:lArrayDocData});
+  }
+
   onTitleChanged(e)
   {
-    this.setState( { docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : e.target.value,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({doc_title:e.target.value});
   }
   onDescriptionChanged(e)
   {
-    this.setState( {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : e.target.value,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({doc_desc  : e.target.value});
   }
   onTypeDocChanged(e)
   {
@@ -86,64 +69,41 @@ class DocumentCreateView extends React.Component {
     {
       lStrValue = null;
     }
-    this.setState(  {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : lStrValue,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({tdoc_id   : lStrValue});
   }
   onCategorieChanged(e)
   {
     var lStrValue = e.target.value;
-    if(e.target.value === "0" )
+    var lArrTiers = [];
+    if(e.target.value !== "0" )
     {
-      lStrValue = null;
+      lArrTiers = this.state.docattributes.cats;
+      if(_.indexOf(lArrTiers,e.target.value) >=0)
+      {
+        lArrTiers.splice(_.indexOf(lArrTiers,e.target.value),1);
+      }
+      else {
+        lArrTiers.push(e.target.value);
+      }
     }
-    this.setState( {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : lStrValue,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({cats: lArrTiers});
   }
   onTierChanged(e)
   {
     var lStrValue = e.target.value;
-    if(e.target.value === "0" )
+    var lArrTiers = [];
+    if(e.target.value !== "0" )
     {
-      lStrValue = null;
+      lArrTiers = this.state.docattributes.tiers;
+      if(_.indexOf(lArrTiers,e.target.value) >=0)
+      {
+        lArrTiers.splice(_.indexOf(lArrTiers,e.target.value),1);
+      }
+      else {
+        lArrTiers.push(e.target.value);
+      }
     }
-    this.setState( {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : lStrValue,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({tiers   : lArrTiers});
   }
 
   // Render Components !
@@ -157,6 +117,8 @@ class DocumentCreateView extends React.Component {
     var tierObj       = LocalData.getAllTiers();
     var typdocObj     = LocalData.getAllTypeDocs();
 
+
+
     // Generate Options HTML Tag for Categorie!
     categorieObj.forEach(function(categorie){
       categorieItems.push(<option key={categorie.cat_id} value={categorie.cat_id}>{categorie.cat_title}</option>);
@@ -169,6 +131,8 @@ class DocumentCreateView extends React.Component {
     typdocObj.forEach(function(typedoc){
       typdocItems.push(<option key={typedoc.tdoc_id} value={typedoc.tdoc_id}>{typedoc.tdoc_title}</option>);
     });
+
+
 
     // CREATION MODE !
     return (
@@ -215,8 +179,9 @@ class DocumentCreateView extends React.Component {
                 <FormControl
                   componentClass="select"
                   placeholder="Choisir une catégorie..."
-                  value={this.state.docattributes.cat_id == null ? 0:this.state.docattributes.cat_id}
-                  onChange={this.handlerCategorieChanged}>
+                  value={this.state.docattributes.cats}
+                  onChange={this.handlerCategorieChanged}
+                  multiple>
                   <option key={0} value={0}>...</option>
                   {categorieItems}
                 </FormControl>
@@ -225,8 +190,8 @@ class DocumentCreateView extends React.Component {
             <FormGroup controlId="formControlsSelect_TierId">
               <Col componentClass={ControlLabel} sm={2}>Tier</Col>
               <Col sm={10}>
-                <FormControl componentClass="select" placeholder="Choisir un Tier..."
-                  value={this.state.docattributes.tier_id == null ? 0:this.state.docattributes.tier_id}
+                <FormControl componentClass="select" placeholder="Choisir un Tier..." multiple
+                  value={this.state.docattributes.tiers}
                   onChange={this.handlerTierChanged}>
                   <option key={0} value={0}>...</option>
                   {tierItems}

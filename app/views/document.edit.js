@@ -3,6 +3,8 @@ import Axios from 'axios';
 import { Form, FormGroup, ControlLabel, FormControl, Col, Button } from 'react-bootstrap';
 
 const LocalData = require('./../application.storage');
+const _ = require('underscore');
+
 /**
  * DocumentView : Document Renderer components
  */
@@ -19,63 +21,54 @@ class DocumentEditView extends React.Component {
     this.handlerTypeDocChanged  = this.onTypeDocChanged.bind(this);
     this.handlerCategorieChanged  = this.onCategorieChanged.bind(this);
     this.handlerTierChanged  = this.onTierChanged.bind(this);
+    this.handlerDateChanged          = this.onDateChanged.bind(this);
 
     // Initial State of the component is defined
     // in the constructor also
     this.state = {
       docattributes : {
-        doc_id    : props.docattributes.doc_id,
-        doc_title : props.docattributes.doc_title,
-        doc_code  : props.docattributes.doc_code,
-        doc_desc  : props.docattributes.doc_desc,
-        tdoc_id   : props.docattributes.tdoc_id,
-        doc_year  : props.docattributes.doc_year,
-        doc_month : props.docattributes.doc_month,
-        doc_day   : props.docattributes.doc_day,
-        meta      : [],
-        cat_id    : props.docattributes.cat_id,
-        tier_id   : props.docattributes.tier_id,
-        file_id   : props.docattributes.file_id
+        doc_id    : props.props.docattributes.doc_id,
+        doc_title : props.props.docattributes.doc_title,
+        doc_code  : props.props.docattributes.doc_code,
+        doc_desc  : props.props.docattributes.doc_desc,
+        tdoc_id   : props.props.docattributes.tdoc_id,
+        doc_year  : props.props.docattributes.doc_year,
+        doc_month : props.props.docattributes.doc_month,
+        doc_day   : props.props.docattributes.doc_day,
+        metas     : [],
+        cats    : [],
+        tiers   : []
       }
     };
+    var lCats = [];
+    props.props.docattributes.cats.forEach(function(elem,itemIdx){
+      lCats.push(elem.cat_id);
+    });
 
-    // Metadata edition only available after creation (need a doc_id)!
-    this.loadMetaAboutDoc();
+    this.state.cats = lCats;
+
+    var lTiers = [];
+    props.props.docattributes.tiers.forEach(function(elem,itemIdx){
+      lTiers.push(elem.tier_id);
+    });
+    this.state.tiers = lTiers;
+  }
+
+  // Merge Categorie attributes with param !
+  _updateFieldValueInState(fieldValues)
+  {
+    var lArrayDocData = this.state.docattributes;
+    _.extend(lArrayDocData,fieldValues);
+    this.setState({docattributes:lArrayDocData});
   }
 
   onTitleChanged(e)
   {
-    this.setState( { docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : e.target.value,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({doc_title:e.target.value});
   }
   onDescriptionChanged(e)
   {
-    this.setState( {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : e.target.value,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({doc_desc  : e.target.value});
   }
   onTypeDocChanged(e)
   {
@@ -84,110 +77,72 @@ class DocumentEditView extends React.Component {
     {
       lStrValue = null;
     }
-    this.setState(  {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : lStrValue,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({tdoc_id   : lStrValue, doc_code : this.generateDocUniqueID(lStrValue,this.state.docattributes.doc_year)});
   }
   onCategorieChanged(e)
   {
     var lStrValue = e.target.value;
-    if(e.target.value === "0" )
+    var lArrTiers = [];
+    if(e.target.value !== "0" )
     {
-      lStrValue = null;
+      lArrTiers = this.state.docattributes.cats;
+      if(_.indexOf(lArrTiers,e.target.value) >=0)
+      {
+        lArrTiers.splice(_.indexOf(lArrTiers,e.target.value),1);
+      }
+      else {
+        lArrTiers.push(e.target.value);
+      }
     }
-    this.setState( {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : lStrValue,
-        tier_id   : this.state.docattributes.tier_id,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({cats   : lArrTiers});
   }
   onTierChanged(e)
   {
     var lStrValue = e.target.value;
-    if(e.target.value === "0" )
+    var lArrTiers = [];
+    if(e.target.value !== "0" )
     {
-      lStrValue = null;
+      lArrTiers = this.state.docattributes.tiers;
+      if(_.indexOf(lArrTiers,e.target.value) >=0)
+      {
+        lArrTiers.splice(_.indexOf(lArrTiers,e.target.value),1);
+      }
+      else {
+        lArrTiers.push(e.target.value);
+      }
     }
-    this.setState( {docattributes : {
-        doc_id    : this.state.docattributes.doc_id,
-        doc_title : this.state.docattributes.doc_title,
-        doc_code  : this.state.docattributes.doc_code,
-        doc_desc  : this.state.docattributes.doc_desc,
-        tdoc_id   : this.state.docattributes.tdoc_id,
-        doc_year  : this.state.docattributes.doc_year,
-        doc_month : this.state.docattributes.doc_month,
-        doc_day   : this.state.docattributes.doc_day,
-        meta      : this.state.docattributes.meta,
-        cat_id    : this.state.docattributes.cat_id,
-        tier_id   : lStrValue,
-        file_id   : this.state.docattributes.file_id
-      }});
+    this._updateFieldValueInState({tiers   : lArrTiers});
   }
 
-  // Load meta for current Document!
-  loadMetaAboutDoc(){
-    var urlAPI = 'http://localhost:8080/php-myged/api/v1/document/'+this.state.docattributes.doc_id+'/getmeta/';
+  onDateChanged(e)
+  {
+    var yearDoc = '';
+    var monthDoc = '';
+    var dayDoc = '';
+    var lObjResultat = {
+      doc_year:'',
+      doc_month:'',
+      doc_day:''
+    }
+    if(e.target.value){
+      var lArrDate = e.target.value.split("-");
+      lObjResultat = {
+        doc_year:lArrDate[0],
+        doc_month:lArrDate[1],
+        doc_day:lArrDate[2],
+        doc_code : this.generateDocUniqueID(this.state.docattributes.tdoc_id,lArrDate[0])
+      };
+    }
+    this._updateFieldValueInState(lObjResultat);
+  }
 
-    let _this = this;
-    // Load meta about document!
-    Axios.get(urlAPI)
-      .then(function(response){
-        console.log('DocumentView - Callback Metadata about document (id:'+_this.props.docid+').');
-        // console.log(response.data); // ex.: { user: 'Your User'}
-        // console.log(response.status); // ex.: 200
-
-        var lArrMetaDoc = [];
-        var i=0;
-        for(i=0;i<response.data.length;i++)
-        {
-          //lArrMetaDoc[response.data[i].meta_id] = response.data[i];
-          lArrMetaDoc[i] = response.data[i];
-        }
-        console.log('DocumentView - Number of Metadata loaded for document (id:'+_this.props.docid+') : '+i.toString());
-        if(response.status == 200)
-        {
-          _this.setState( {
-            docattributes : {
-              doc_id    : _this.state.docattributes.doc_id,
-              doc_title : _this.state.docattributes.doc_title,
-              doc_code  : _this.state.docattributes.doc_code,
-              doc_desc  : _this.state.docattributes.doc_desc,
-              tdoc_id   : _this.state.docattributes.tdoc_id,
-              doc_year  : _this.state.docattributes.doc_year,
-              doc_month : _this.state.docattributes.doc_month,
-              doc_day   : _this.state.docattributes.doc_day,
-              meta      : lArrMetaDoc,
-              cat_id    : _this.state.docattributes.cat_id,
-              tier_id   : _this.state.docattributes.tier_id,
-              file_id   : _this.state.docattributes.file_id
-            }
-          });
-        }
-        else {
-          console.log('DocumentView - Error during HTTP Response Analysis (HTTP Code:'+response.status+').');
-        }
-      }
-    );
+  generateDocUniqueID(typeCode,yearDoc){
+    var typdocObj = { tdoc_code:'temp' };
+    if(typeCode && typeCode !== '')
+    {
+      typdocObj = LocalData.getTypeDocById(typeCode);
+    }
+    return 'D-'+typdocObj.tdoc_code.toUpperCase()+'-'+yearDoc.toString()+'-XXXX';
   }
 
   // Render Components !
@@ -218,7 +173,7 @@ class DocumentEditView extends React.Component {
     var metaControlItems = [];
 
     // Generate FormControl Bootsrap Tag for All Metadata!
-    this.state.docattributes.meta.forEach(function(meta){
+    this.state.docattributes.metas.forEach(function(meta){
       var lStrIdControl = {
         id: 'formControlsText_'+meta.meta_id
       };
@@ -241,7 +196,17 @@ class DocumentEditView extends React.Component {
           <h3 title={this.props.docid}>{this.props.docattributes.doc_title}</h3>
         </header>
         <Form horizontal>
-
+          <FormGroup controlId='formControlsText_DocCode'>
+              <Col componentClass={ControlLabel} sm={2}>Doc #</Col>
+              <Col sm={10}>
+                <FormControl
+                  type='text'
+                  disabled={true}
+                  placeholder='Document Unique Code # AUTO'
+                  value={this.state.docattributes.doc_code}
+                  />
+              </Col>
+          </FormGroup>
           <FormGroup controlId="formControlsSelect_TypeDocId">
             <Col componentClass={ControlLabel} sm={2}>Type</Col>
             <Col sm={10}>
@@ -271,6 +236,7 @@ class DocumentEditView extends React.Component {
                 <FormControl
                   type="date"
                   placeholder='DD/MM/YYY'
+                  onChange={this.handlerDateChanged}
                    />
               </Col>
           </FormGroup>
@@ -280,9 +246,8 @@ class DocumentEditView extends React.Component {
               <FormControl
                 componentClass="select"
                 placeholder="Choisir une catégorie..."
-                value={this.state.docattributes.cat_id == null ? 0:this.state.docattributes.cat_id}
-                onChange={this.handlerCategorieChanged}>
-                <option key={0} value={0}>...</option>
+                value={this.state.docattributes.cats}
+                onChange={this.handlerCategorieChanged} multiple>
                 {categorieItems}
               </FormControl>
             </Col>
@@ -291,9 +256,8 @@ class DocumentEditView extends React.Component {
             <Col componentClass={ControlLabel} sm={2}>Tier</Col>
             <Col sm={10}>
               <FormControl componentClass="select" placeholder="Choisir un Tier..."
-                value={this.state.docattributes.tier_id == null ? 0:this.state.docattributes.tier_id}
-                onChange={this.handlerTierChanged}>
-                <option key={0} value={0}>...</option>
+                value={this.state.docattributes.tiers}
+                onChange={this.handlerTierChanged} multiple>
                 {tierItems}
               </FormControl>
             </Col>
@@ -317,7 +281,7 @@ class DocumentEditView extends React.Component {
         </Form>
 
           <p>&nbsp;</p>
-        <footer> Footer Article {this.props.docid} </footer>
+        <footer> </footer>
       </article>
     );
   }

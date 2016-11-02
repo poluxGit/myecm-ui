@@ -14,6 +14,8 @@ import Axios from 'axios';
 import pubsub from 'pubsub-js';
 import { Tabs, Tab, TabContainer, TabContent, TabPane } from 'react-bootstrap';
 
+const LocalData = require('./../application.storage');
+
 // Main Panels Renderer & Manager !
 class ViewsContainer extends React.Component {
 
@@ -81,8 +83,9 @@ class ViewsContainer extends React.Component {
   openEditDocViewPanel(docid)
   {
     if(docid){
-      this.openNewPanel('doc-edit',docid,{docid:docid});
-}
+      var lObjDoc = LocalData.getDocumentbyId(docid);
+      this.openNewPanel('doc-edit',docid,{docattributes:lObjDoc});
+    }
   }
 
   // Open a new Document View Panels !
@@ -148,7 +151,7 @@ class ViewsContainer extends React.Component {
         }
         else if (item.mode === 'doc-edit') {
           renderedPanels.push(<Tab key={item.id} eventKey={idx} title={item.title}>
-              <DocumentEditView docid={item.props.docid} />
+              <DocumentEditView props={item.props} />
             </Tab>
           );
         }
