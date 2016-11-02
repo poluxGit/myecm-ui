@@ -168,6 +168,35 @@ function loadTiersFromServer() {
     });
 }
 
+// Adding a new Catégorie!
+function createNewCategorie(catdata, callbackHandler) {
+
+  // Data existance checks!
+  if(catdata.cat_code && catdata.cat_title)
+  {
+    var query_param = catdata;
+    var lUrlQuery = 'categorie/'
+
+    // Launch AJAX Request !
+    Axios.get('typedocument/')
+      .then(function(response){
+        if(response.status == 200){
+          console.log('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
+          LocalData.addSessionLogMessage('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
+          LocalData.setTypeDocs(response.data);
+        }
+        else {
+          console.log('AppMyDocsContainer - Erreur lors du chargement des données de typedoc (HTTP Code:'+response.status+').');
+        }
+      }).catch(function(error){
+        console.log(error);
+      });
+  }else {
+    return undefined;
+  }
+
+}
+
 /**
  * Load Tiers from server
  */
@@ -194,9 +223,13 @@ function loadTypesDocFromServer() {
 
 // expose the methods as static module!
 module.exports = {
+  // Load functionnalities
   loadDocumentsFromServer   : loadDocumentsFromServer,
   loadTypesDocFromServer    : loadTypesDocFromServer,
   loadTiersFromServer       : loadTiersFromServer,
   loadCategoriesFromServer  : loadCategoriesFromServer,
-  loadAllDataAboutDocuments : loadAllDataAboutDocuments
+  loadAllDataAboutDocuments : loadAllDataAboutDocuments,
+
+  // Creation function!
+  createCategorie           : createNewCategorie
 };

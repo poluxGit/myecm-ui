@@ -5,6 +5,7 @@
 ## Technical information
 
 
+
 ### Project structure
 
 Application internal folder tree is organized like explain hereunder :

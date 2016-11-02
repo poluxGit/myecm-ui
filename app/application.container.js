@@ -11,13 +11,13 @@ import Search from './components/search.component';
 import AppHistory from './components/history.component';
 import Toolbar from './components/toolbar.component';
 import ViewsContainer from './containers/views.container';
+import CategorieCreateModal from './views/categorie.create';
 import pubsub from 'pubsub-js';
 import Axios from 'axios';
 import { PageHeader, Button , Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 
 const localData     = require('./application.storage');
 const localDataSync = require('./application.data-sync');
-
 
 // Main GUI Class - React.component Class extended
 class AppMyDocsContainer extends React.Component {
@@ -26,8 +26,8 @@ class AppMyDocsContainer extends React.Component {
    * Default constructor
    */
   constructor(props) {
-    super(props);
 
+    super(props);
     this.handleCreateDoc = this.handleCreateDoc.bind(this);
 
     // localStor.setItem('itemPoLuX','tot');
@@ -127,7 +127,8 @@ class AppMyDocsContainer extends React.Component {
   }
 
   handleAddCat(){
-    alert('CREATE CAT');
+    pubsub.publish('app-cat-create', null);
+    localData.addSessionHistoryMessage('Ouverture du formulaire de création de Catégorie.');
   }
 
   handleAddTier(){
@@ -181,6 +182,7 @@ class AppMyDocsContainer extends React.Component {
               />
           </div>
         </article>
+        <CategorieCreateModal />
         <footer id={this.state.html_items.footerId}>
             By {this.props.application_author.author_name} - {this.props.application_version}
         </footer>
