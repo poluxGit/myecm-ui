@@ -80,8 +80,9 @@ class ViewsContainer extends React.Component {
   // Open an existing Document View (edit mode)!
   openEditDocViewPanel(docid)
   {
-      this.openNewPanel('doc-edit','Edition de document',{docid:docid});
-
+    if(docid){
+      this.openNewPanel('doc-edit',docid,{docid:docid});
+}
   }
 
   // Open a new Document View Panels !
@@ -102,7 +103,7 @@ class ViewsContainer extends React.Component {
   // Open a new panels
   openNewPanel(type,title,options){
     console.log('ViewsContainer - Opening a new panel (Type:'+type+'|Title:"'+title+'").');
-    var panels = this.state.panels;
+    var panels = this.state.panels.slice();
 
     var newPanel = [{
       id    : 'panel_'+type,
