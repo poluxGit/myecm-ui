@@ -38,7 +38,7 @@ class DocumentTable extends React.Component {
     var lStrResultat = '';
     for(var i=0;i<cell.length;i++){
       var title = cell[i].tier_title;
-      lStrResultat += '<Badge> '+title+' </Badge>';
+      lStrResultat += '<Badge> '+title+' </Badge><br />';
     }
     return lStrResultat;
   }
@@ -48,7 +48,7 @@ class DocumentTable extends React.Component {
     var lStrResultat = '';
     for(var i=0;i<cell.length;i++){
       var title = cell[i].cat_title;
-      lStrResultat += '<Badge> '+title+' </Badge>';
+      lStrResultat += '<Badge> '+title+' </Badge><br />';
     }
     return lStrResultat;
   }
