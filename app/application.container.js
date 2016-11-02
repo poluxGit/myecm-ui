@@ -6,14 +6,16 @@
  * @author polux
  * @extends React.Component
  */
-import React  from 'react';
-import Search from './components/search.component';
-import AppHistory from './components/history.component';
-import Toolbar from './components/toolbar.component';
-import ViewsContainer from './containers/views.container';
+import React                from 'react';
+import Search               from './components/search.component';
+import AppHistory           from './components/history.component';
+import Toolbar              from './components/toolbar.component';
+import ViewsContainer       from './containers/views.container';
 import CategorieCreateModal from './views/categorie.create';
-import pubsub from 'pubsub-js';
-import Axios from 'axios';
+import TierCreateModal      from './views/tier.create';
+import AppMessages          from './components/message.component';
+import pubsub               from 'pubsub-js';
+import Axios                from 'axios';
 import { PageHeader, Button , Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 
 const localData     = require('./application.storage');
@@ -132,14 +134,18 @@ class AppMyDocsContainer extends React.Component {
   }
 
   handleAddTier(){
-    alert('CREATE TIER');
+    pubsub.publish('app-tier-create', null);
+    localData.addSessionHistoryMessage('Ouverture du formulaire de création de Tier.');
   }
 
   // Container components wrap presentation component
   render() {
     return (
       <div id={this.state.html_items.containerId}>
-        <PageHeader id={this.state.html_items.headerId} > {this.props.application_title} <small> {this.props.application_author.author_name} </small></PageHeader>
+        <PageHeader id={this.state.html_items.headerId}>
+           {this.props.application_title} <small> {this.props.application_author.author_name} </small>
+         <AppMessages />
+        </PageHeader>
 
         <Navbar inverse collapseOnSelect>
           <Navbar.Header>
@@ -157,6 +163,7 @@ class AppMyDocsContainer extends React.Component {
             </Nav>
             <Nav pullRight>
               <NavDropdown eventKey={10} title="Ajouter ..." id="basic-nav-dropdown">
+                <MenuItem eventKey={10.4} onClick={this.handleCreateDoc}>Document</MenuItem>
                 <MenuItem eventKey={10.1} onClick={this.handleAddCat}>Catégorie</MenuItem>
                 <MenuItem eventKey={10.2} onClick={this.handleAddTier}>Tier</MenuItem>
                 <MenuItem eventKey={10.3} onClick={this.handleAddTypeDoc}>Type de document</MenuItem>
@@ -183,6 +190,7 @@ class AppMyDocsContainer extends React.Component {
           </div>
         </article>
         <CategorieCreateModal />
+        <TierCreateModal />
         <footer id={this.state.html_items.footerId}>
             By {this.props.application_author.author_name} - {this.props.application_version}
         </footer>

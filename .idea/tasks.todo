@@ -1,13 +1,16 @@
 In Progress:
-☐ Finaliser le système de persistance des données côté Client cf. store.js
+✔ Finaliser le système de persistance des données côté Client cf. store.js @done(2016-11-02 14:00)
 
-
+☐ Interface de création de type de document.
+☐ Interface Liste de fichiers (entrée dans menu Liste des fichiers non affectés).
+☐ Interface Création de fichiers (lié à l'UPLOAD).
+☐ Upload de fichier source.
+☐ Implémentation OCR.
+☐ Implémentation notion de Tâche => Component React. avec Progress Bar ... Liste de tâches en cours - Bien normaliser les formats d'échange !!!
 
 Version alpha-01:
 ☐ Electron Application
 ☐ API finalized
-
-
 
 Development Notes:
 doc-5803e0f199fe3
