@@ -16,7 +16,7 @@ let win
  */
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({width: 1200, height: 800,  resizable:true})
+  win = new BrowserWindow({width: 1500, height: 800,  resizable:true})
 
   // and load the index.html of the app.
   win.loadURL(`file://${__dirname}/public/index.html`)

@@ -7,8 +7,7 @@
 
 import React  from 'react';
 import ReactDOM from 'react-dom';
-import DocumentEditView from './../views/document.edit';
-import DocumentCreateView from './../views/document.create';
+import DocumentView from './../views/document.view';
 import TableDocumentView from './../views/document.table';
 import Axios from 'axios';
 import pubsub from 'pubsub-js';
@@ -176,13 +175,13 @@ class ViewsContainer extends React.Component {
         if(item.mode === 'doc-create')
         {
           renderedPanels.push(<Tab key={item.id} eventKey={idx} title={item.title}>
-              <DocumentCreateView />
+              <DocumentView />
             </Tab>
           );
         }
         else if (item.mode === 'doc-edit') {
           renderedPanels.push(<Tab key={item.id} eventKey={idx} title={item.title}>
-              <DocumentEditView props={item.props} />
+              <DocumentView props={item.props} />
             </Tab>
           );
         }

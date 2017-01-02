@@ -79,13 +79,33 @@ function setDocumentsData(pArrDocuments) {
     console.log('ApplicationStorageSystem - ' + pArrDocuments.length.toString() + ' document(s) saved into localStorage');
 }
 
+// Save Files meta into localStorage
+function setFilesMetaData(pArrFilesMeta) {
+    localStorage.setItem('files',JSON.stringify(pArrFilesMeta));
+    console.log('ApplicationStorageSystem - ' + pArrFilesMeta.length.toString() + ' file(s) metadata saved into localStorage');
+}
+
+// Get all Files meta Objects !
+function getAllFilesMetaObj() {
+  if(localStorage.getItem('files')){
+    return JSON.parse(localStorage.getItem('files'));
+  }
+  else {
+        return [];
+  }
+}
+
+
+
+
+
 // Get All Docs Objects !
 function getAllDocumentsObj() {
   if(localStorage.getItem('documents')){
     return JSON.parse(localStorage.getItem('documents'));
   }
   else {
-        return null;
+        return [];
   }
 }
 // Get Documents count !
@@ -260,7 +280,7 @@ function getAllCategoriesObj() {
     return JSON.parse(localStorage.getItem('categories'));
   }
   else {
-        return null;
+        return [];
   }
 }
 
@@ -306,8 +326,35 @@ function getAllTiersObj() {
     return JSON.parse(localStorage.getItem('tiers'));
   }
   else {
-        return null;
+        return [];
   }
+}
+
+// Return Tier Data as an object
+function getFileData(fileid) {
+  var lObjDocResult = undefined;
+  if(fileid){
+    var lTabDocs = JSON.parse(localStorage.getItem('files'));
+
+    if(lTabDocs && lTabDocs.length > 0) {
+      // Looking for aimed document!
+      for(var i = 0;i<lTabDocs.length;i++)
+      {
+        if(lTabDocs[i].file_id == fileid)
+        {
+          //console.debug('ApplicationStorageSystem - Tier with ID "' + tierid + '" founded!');
+          lObjDocResult = lTabDocs[i];
+          return lObjDocResult;
+        }
+      }
+    }
+    // No result possible => Empty Array!
+  }
+  else {
+    // docid isn't defined => No Result !
+    lObjDocResult = undefined;
+  }
+  return lObjDocResult;
 }
 
 /* ************************************************************************** */
@@ -352,7 +399,7 @@ function getAllTypeDocsObj() {
     return JSON.parse(localStorage.getItem('typedocs'));
   }
   else {
-        return null;
+        return [];
   }
 }
 
@@ -402,7 +449,7 @@ function getAllHistoryObjects()
   if(sessionStorage.getItem('history')) {
     return JSON.parse(sessionStorage.getItem('history'))
   }
-  return null;
+  return [];
 }
 
 // Add a Seesion log entry!
@@ -422,14 +469,14 @@ function getAllLogsObjects()
   if(sessionStorage.getItem('logs')) {
     return JSON.parse(sessionStorage.getItem('logs'))
   }
-  return null;
+  return [];
 }
 
 // expose the methods as static module!
 module.exports = {
   // Documents
   setDocuments            : setDocumentsData,
-  getDocumentbyId         : getDocumentData,
+  getDocumentById         : getDocumentData,
   getAllDocuments         : getAllDocumentsObj,
   getAllCategorieByDoc    : getAllCategorieByDoc,
   setDocumentsCategories  : setDocumentsCategories,
@@ -437,6 +484,9 @@ module.exports = {
   setDocumentsTiers       : setDocumentsTiers,
   getAllMetasByDoc        : getAllMetasByDoc,
   setDocumentsMetas       : setDocumentsMetas,
+  getAllFiles             : getAllFilesMetaObj,
+  setFiles                : setFilesMetaData,
+  getFileById             : getFileData,
 
   // Catégories
   setCategories       : setCategoriesData,

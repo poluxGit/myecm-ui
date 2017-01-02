@@ -39,6 +39,30 @@ function loadDocumentsFromServer() {
     });
 }
 
+/**
+ * Load Files metadata from server
+ */
+function loadFilesMetaFromServer() {
+
+  var lURLRestAPI = LocalData.getAppSetting('url-restapi');
+  LocalData.addSessionLogMessage('ApplicationDataSynchronizer - Refresh Files metadata from "'+lURLRestAPI+'file/" !');
+
+  // Launch AJAX Request !
+  Axios.get('file/')
+    .then(function(response){
+      if(response.status == 200){
+        console.log('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
+        LocalData.addSessionLogMessage('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
+        LocalData.setFiles(response.data);
+      }
+      else {
+        console.log('AppMyDocsContainer - Erreur lors du chargement des données des Fichiers (HTTP Code:'+response.status+').');
+      }
+    }).catch(function(error){
+      console.log(error);
+    });
+}
+
 function loadCategoriesDataForDoc(docid)
 {
   var lUrlGetMeta = 'document/'+docid+'/getcat/';
@@ -316,13 +340,13 @@ function updateDocument(docsdata, callbackHandler) {
     var query_options = {
       headers:{'Content-Type': 'application/x-www-form-urlencoded'}
     };
-    var lUrlQuery = 'document/'+docsdata.doc_id;
+    var lUrlQuery = 'document/'+docsdata.doc_id+'/';
 
     // Launch AJAX Request !
     Axios.put(lUrlQuery, params,query_options)
       .then(function(response){
         if(response.status == 200){
-          console.log('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+          console.log('ApplicationDataSynchronizer - HTTP PUT Response OK (HTTP:200).');
           LocalData.addSessionLogMessage('HTTP POST - Maj de Document - Code:200 => OK | Data returned: '+JSON.stringify(response));
         }
         else {
@@ -332,12 +356,53 @@ function updateDocument(docsdata, callbackHandler) {
       }).catch(function(error){
         console.log(error);
       });
-  }else {
+  } else {
     console.err('AppMyDocsContainer - Erreur lors de la création d\'un Document).');
     throw new Error('Impossible de créer un Document. Les arguments sont insuffisants!');
   }
 }//end updateDocument()
 
+/**
+ * Update a Document
+ *
+ */
+function updateTier(tierdata, callbackHandler) {
+
+  console.log('ApplicationDataSynchronizer - HTTP PUT Request About Tier update.');
+  // Data existance checks!
+  if(tierdata.tier_code && tierdata.tier_title)
+  {
+    var query_param = tierdata;
+    var params = '';
+    var key = '';
+    for (key in query_param) {
+        params += encodeURIComponent(key)+"="+encodeURIComponent(query_param[key])+"&";
+    }
+
+    var query_options = {
+      headers:{'Content-Type': 'application/x-www-form-urlencoded'}
+    };
+    var lUrlQuery = 'tier/'+tierdata.tier_id+'/';
+
+    // Launch AJAX Request !
+    Axios.put(lUrlQuery, params,query_options)
+      .then(function(response){
+        if(response.status == 200){
+          console.log('ApplicationDataSynchronizer - HTTP PUT Response OK (HTTP:200).');
+          LocalData.addSessionLogMessage('HTTP PUT - Update de TIER - Code:200 => OK | Data returned: '+JSON.stringify(response));
+        }
+        else {
+          console.log('AppMyDocsContainer - Erreur lors de la création d\'un Tier (HTTP Code:'+response.status+').');
+        }
+        callbackHandler(response);
+      }).catch(function(error){
+        console.log(error);
+      });
+  }else {
+    console.err('AppMyDocsContainer - Erreur lors de la mise à jour d\'un Tier).');
+    throw new Error('Impossible de mettre à jour un tier. Les arguments sont insuffisants!');
+  }
+}//end updateTier()
 
 /**
  * Delete a Document
@@ -496,6 +561,78 @@ function loadTypesDocFromServer() {
     });
 }
 
+/**
+ * Launch OCR Analysis on server
+ */
+function createOCRAnalysisOnServer(callbackHandler) {
+
+  var lURLRestAPI = LocalData.getAppSetting('url-restapi');
+  LocalData.addSessionLogMessage('ApplicationDataSynchronizer - Init an OCR Analysis Task !');
+
+  // Launch AJAX Request !
+  Axios.post('tasks/ocr/')
+    .then(function(response){
+      if(response.status == 200){
+        console.log('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+        LocalData.addSessionLogMessage('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+        callbackHandler(response.data);
+      }
+      else {
+        console.log('AppMyDocsContainer - Erreur lors du lancment de l\'analyse OCR (HTTP Code:'+response.status+').');
+      }
+    }).catch(function(error){
+      console.log(error);
+    });
+}
+
+/**
+ * Launch OCR Analysis on server
+ */
+function launchOCRAnalysisOnServer(taskid,fileid,callbackHandler) {
+
+  var lURLRestAPI = LocalData.getAppSetting('url-restapi');
+  LocalData.addSessionLogMessage('ApplicationDataSynchronizer - Launch OCR Analysis "'+taskid+'" on file "'+fileid+'" !');
+
+  // Launch AJAX Request !
+  Axios.post('tasks/ocr/'+taskid+'/'+fileid+'/')
+    .then(function(response){
+      if(response.status == 200){
+        console.log('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+        LocalData.addSessionLogMessage('ApplicationDataSynchronizer - HTTP POST Response OK (HTTP:200).');
+        callbackHandler(response.data);
+      }
+      else {
+        console.log('AppMyDocsContainer - Erreur lors du lancment de l\'analyse OCR (HTTP Code:'+response.status+').');
+      }
+    }).catch(function(error){
+      console.log(error);
+    });
+}
+
+/**
+ * Launch OCR Analysis on server
+ */
+function getTaskInfo(taskid) {
+
+  var lURLRestAPI = LocalData.getAppSetting('url-restapi');
+  LocalData.addSessionLogMessage('ApplicationDataSynchronizer - Getting data about task #'+taskid+' !');
+
+  // Launch AJAX Request !
+  Axios.get('tasks/'+taskid+'/')
+    .then(function(response){
+      if(response.status == 200){
+        console.log('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
+        LocalData.addSessionLogMessage('ApplicationDataSynchronizer - HTTP GET Response OK (HTTP:200).');
+        return response.data;
+      }
+      else {
+        console.log('AppMyDocsContainer - Erreur lors du lancment de l\'analyse OCR (HTTP Code:'+response.status+').');
+      }
+    }).catch(function(error){
+      console.log(error);
+    });
+}
+
 // expose the methods as static module!
 module.exports = {
   // Load functionnalities
@@ -503,16 +640,21 @@ module.exports = {
   loadTypesDocFromServer    : loadTypesDocFromServer,
   loadTiersFromServer       : loadTiersFromServer,
   loadCategoriesFromServer  : loadCategoriesFromServer,
+  loadFilesMetaFromServer   : loadFilesMetaFromServer,
   loadAllDataAboutDocuments : loadAllDataAboutDocuments,
 
   // Creation function!
   createCategorie           : createNewCategorie,
   createTier                : createNewTier,
   createDocument            : createNewDocument,
+  createOCRAnalysisOnServer : createOCRAnalysisOnServer,
+  launchOCRAnalysisOnServer : launchOCRAnalysisOnServer,
+  getTaskInfo               : getTaskInfo,
 
   addCategoriesToDocument   : addCategoriesToDocument,
   addTiersToDocument        : addTiersToDocument,
 
   deleteDocument            : deleteDocument,
-  updateDocument            : updateDocument
+  updateDocument            : updateDocument,
+  updateTier                : updateTier
 };

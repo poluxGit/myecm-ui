@@ -54,7 +54,7 @@ class DocumentTable extends React.Component {
   }
 
   handlerSelectDocument(row,isSelected,event){
-    pubsub.publish('open-doc-edit-panel', row.doc_id);
+    pubsub.publish('app-doc-edit', row.doc_id);
   }
 
 

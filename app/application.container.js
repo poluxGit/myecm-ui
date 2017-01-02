@@ -10,9 +10,12 @@ import React                from 'react';
 import Search               from './components/search.component';
 import AppHistory           from './components/history.component';
 import Toolbar              from './components/toolbar.component';
-import ViewsContainer       from './containers/views.container';
-import CategorieCreateModal from './views/categorie.create';
-import TierCreateModal      from './views/tier.create';
+//import ViewsContainer       from './containers/views.container';
+import FilesTable           from './views/file.table';
+import CategorieModal       from './views/categorie.view';
+import DocumentModal        from './views/document.view';
+import FileModal            from './views/file.view';
+import TierModal            from './views/tier.view';
 import AppMessages          from './components/message.component';
 import pubsub               from 'pubsub-js';
 import Axios                from 'axios';
@@ -31,8 +34,6 @@ class AppMyDocsContainer extends React.Component {
 
     super(props);
     this.handleCreateDoc = this.handleCreateDoc.bind(this);
-
-    // localStor.setItem('itemPoLuX','tot');
 
     // State default data!
     this.state = {
@@ -81,9 +82,11 @@ class AppMyDocsContainer extends React.Component {
     localData.addSessionHistoryMessage('Loading typedocs data from server.');
     localDataSync.loadTypesDocFromServer();
 
+    localData.addSessionHistoryMessage('Loading files metadata from server.');
+    localDataSync.loadFilesMetaFromServer();
+
     localData.addSessionHistoryMessage('Loading all data about documents from server.');
     localDataSync.loadAllDataAboutDocuments();
-
   }
 
   /**
@@ -113,8 +116,14 @@ class AppMyDocsContainer extends React.Component {
   // Update state Value attribute
   handleCreateDoc(e) {
     console.log(`AppMyDocsContainer - Event CreateDoc launched.`);
-    pubsub.publish('open-doc-create-panel', null);
+    pubsub.publish('app-doc-create', null);
     localData.addSessionHistoryMessage('Création de document.');
+  }
+  // Update state Value attribute
+  handleEditDoc(docId) {
+    console.log(`AppMyDocsContainer - Event EditDoc launched on '`+docId+`'.`);
+    pubsub.publish('app-doc-edit', docId);
+    localData.addSessionHistoryMessage('Edition de document "'+docId+'".');
   }
 
   // Display all docuement in table
@@ -125,7 +134,18 @@ class AppMyDocsContainer extends React.Component {
   }
 
   handleAddTypeDoc(){
-    alert('CREATE TYPEDOC');
+    pubsub.publish('app-tier-edit', 'tie-edf');
+    localData.addSessionHistoryMessage('Edition du tier => .');
+  }
+
+  handleEditTier(tierId){
+    pubsub.publish('app-tier-edit', tierId);
+    localData.addSessionHistoryMessage('Edition du tier => '+tierId);
+  }
+
+  handleEditCat(catId){
+    pubsub.publish('app-cat-edit', catId);
+    localData.addSessionHistoryMessage('Edition de la Catégorie => '+catId);
   }
 
   handleAddCat(){
@@ -167,6 +187,8 @@ class AppMyDocsContainer extends React.Component {
                 <MenuItem eventKey={10.1} onClick={this.handleAddCat}>Catégorie</MenuItem>
                 <MenuItem eventKey={10.2} onClick={this.handleAddTier}>Tier</MenuItem>
                 <MenuItem eventKey={10.3} onClick={this.handleAddTypeDoc}>Type de document</MenuItem>
+                <MenuItem eventKey={10.5} onClick={()=>{this.handleEditTier('tie-edf');}}>Edit Tier Test DEV</MenuItem>
+                <MenuItem eventKey={10.6} onClick={()=>{this.handleEditDoc('doc-58658d671ffd5');}}>Edit Doc Test DEV</MenuItem>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>
@@ -181,16 +203,13 @@ class AppMyDocsContainer extends React.Component {
             </ul>
           </div>
           <div id={this.state.html_items.rightPanelId}>
-            <ViewsContainer
-              CategoriesData={this.state.cat_data}
-              DocumentsData={this.state.docs_data}
-              TiersData={this.state.tier_data}
-              TypesDocData={this.state.tydoc_data}
-              />
+                <FilesTable />
           </div>
         </article>
-        <CategorieCreateModal />
-        <TierCreateModal />
+        <CategorieModal />
+        <FileModal />
+        <DocumentModal />
+        <TierModal />
         <footer id={this.state.html_items.footerId}>
             By {this.props.application_author.author_name} - {this.props.application_version}
         </footer>
